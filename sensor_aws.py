@@ -37,43 +37,39 @@ def publishToIoTTopic(topic, payload):
 #===========================================================================================
 
 while True:
-	try:
-		GPIO.setmode(GPIO.BCM)
-		TRIG = 6
-		ECHO = 5
-		GPIO.setup(TRIG,GPIO.OUT)
-		GPIO.setup(ECHO,GPIO.IN)
-		GPIO.output(TRIG, False)
-		time.sleep(5)
+	GPIO.setmode(GPIO.BCM)
+	TRIG = 6
+	ECHO = 5
+	GPIO.setup(TRIG,GPIO.OUT)
+	GPIO.setup(ECHO,GPIO.IN)
+	GPIO.setwarnings(False)
+	GPIO.output(TRIG, False)
+	time.sleep(5)
 
 #Enabling and Disabling Trigger to get data
 
-		GPIO.output(TRIG, True)
-		time.sleep(0.00001)
-		GPIO.output(TRIG, False)
+	GPIO.output(TRIG, True)
+	time.sleep(0.00001)
+	GPIO.output(TRIG, False)
 
-		while GPIO.input(ECHO)==0:
-			pulse_start = time.time()
+	while GPIO.input(ECHO)==0:
+		pulse_start = time.time()
 
-		while GPIO.input(ECHO)==1:
-			pulse_end = time.time()
+	while GPIO.input(ECHO)==1:
+		pulse_end = time.time()
 
-		pulse_duration = pulse_end - pulse_start
+	pulse_duration = pulse_end - pulse_start
 
-		distance = pulse_duration * 17150
+	distance = pulse_duration * 17150
 
-		distance = round(distance, 2)
+	distance = round(distance, 2)
 
-		Time = str(time.strftime("%Y-%m-%d %H:%M:%S"))
+	Time = str(time.strftime("%Y-%m-%d %H:%M:%S"))
 
-		message = {}
-		message['Distance in cm'] = distance
-		message['Time'] = Time
-		data = json.dumps(message)
+	message = {}
+	message['Distance'] = distance
+	message['Time'] = Time
+	data = json.dumps(message)
 
-		publishToIoTTopic(pubTopic, data)
-
-	except Exception as e:
-		continue
-	else:
-		GPIO.cleanup()
+	publishToIoTTopic(pubTopic, data)
+	GPIO.cleanup()
