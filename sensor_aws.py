@@ -76,11 +76,9 @@ def get_distance():
 
 distance = get_distance()
 date_time = str(time.strftime("%Y-%m-%d %H:%M:%S"))
-print("Distance:",distance)
 message = {}
 message['Distance'] = distance
 message['Time'] = date_time
 data = json.dumps(message)
 publishToIoTTopic(pubTopic, data)
 GPIO.cleanup()
-print("Execution Completed")

@@ -53,3 +53,5 @@ sudo systemctl daemon-reload
 sudo systemctl enable WaterLevelSensor.service
 sudo systemctl start WaterLevelSensor.service
 ---------------------------------------------------------------------------------------------------
+run the python program for every minute
+*/1 * * * * sudo python3 /home/ubuntu/sensor_aws.py
