@@ -35,40 +35,50 @@ def publishToIoTTopic(topic, payload):
     myAWSIoTMQTTClient.publish(topic, payload, 1)
 
 #===========================================================================================
-
+#=============Initialization==================
+TRIG = 6
+ECHO = 5
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(TRIG,GPIO.OUT)
+GPIO.setup(ECHO,GPIO.IN)
+GPIO.setwarnings(False)
+GPIO.output(TRIG, False)
+time.sleep(5)
+#===========================================================================================
 while True:
-	GPIO.setmode(GPIO.BCM)
-	TRIG = 6
-	ECHO = 5
-	GPIO.setup(TRIG,GPIO.OUT)
-	GPIO.setup(ECHO,GPIO.IN)
-	GPIO.setwarnings(False)
-	GPIO.output(TRIG, False)
-	time.sleep(5)
+    K=0
+    distance_addition = 0
+    for X in range(20):
+        try:
+            GPIO.output(TRIG, True)
+            time.sleep(0.00001)
+            GPIO.output(TRIG, False)
 
-#Enabling and Disabling Trigger to get data
+            while GPIO.input(ECHO)==0:
+                pulse_start = time.time()
 
-	GPIO.output(TRIG, True)
-	time.sleep(0.00001)
-	GPIO.output(TRIG, False)
+            while GPIO.input(ECHO)==1:
+                pulse_end = time.time()
 
-	while GPIO.input(ECHO)==0:
-		pulse_start = time.time()
+            pulse_duration = pulse_end - pulse_start
+            distance = pulse_duration * 17150
+            distance = round(distance, 3)
 
-	while GPIO.input(ECHO)==1:
-		pulse_end = time.time()
+            if (distance>150):
+                K=K+1
+                continue
+            distance_addition = distance_addition + distance
+            time.sleep(0.1)
+        except Exception as e :
+            pass
+    average_distance = distance_addition / (X+1 -K)
+    actual_distance = round(average_distance,3)
 
-	pulse_duration = pulse_end - pulse_start
-
-	distance = pulse_duration * 17150
-
-	distance = round(distance, 2)
-
-	Time = str(time.strftime("%Y-%m-%d %H:%M:%S"))
+	date_time  = str(time.strftime("%Y-%m-%d %H:%M:%S"))
 
 	message = {}
 	message['Distance'] = distance
-	message['Time'] = Time
+	message['Time'] = date_time
 	data = json.dumps(message)
 
 	publishToIoTTopic(pubTopic, data)
