@@ -34,8 +34,7 @@ myAWSIoTMQTTClient.connect()
 def publishToIoTTopic(topic, payload):
     myAWSIoTMQTTClient.publish(topic, payload, 1)
 
-#===========================================================================================
-#=============Initialization==================
+#============================Initialization=================================================
 TRIG = 6
 ECHO = 5
 GPIO.setmode(GPIO.BCM)
@@ -43,12 +42,13 @@ GPIO.setup(TRIG,GPIO.OUT)
 GPIO.setup(ECHO,GPIO.IN)
 GPIO.setwarnings(False)
 GPIO.output(TRIG, False)
-time.sleep(5)
+time.sleep(1)
 #===========================================================================================
-while True:
-    K=0
+
+def get_distance():
     distance_addition = 0
-    for X in range(20):
+    K=0
+    for X in range(21):
         try:
             GPIO.output(TRIG, True)
             time.sleep(0.00001)
@@ -63,8 +63,7 @@ while True:
             pulse_duration = pulse_end - pulse_start
             distance = pulse_duration * 17150
             distance = round(distance, 3)
-
-            if (distance>150):
+            if (distance > 150) and (X!=K):
                 K=K+1
                 continue
             distance_addition = distance_addition + distance
@@ -73,13 +72,15 @@ while True:
             pass
     average_distance = distance_addition / (X+1 -K)
     actual_distance = round(average_distance,3)
+    return actual_distance
 
-	date_time  = str(time.strftime("%Y-%m-%d %H:%M:%S"))
-
-	message = {}
-	message['Distance'] = distance
-	message['Time'] = date_time
-	data = json.dumps(message)
-
-	publishToIoTTopic(pubTopic, data)
-	GPIO.cleanup()
+distance = get_distance()
+date_time = str(time.strftime("%Y-%m-%d %H:%M:%S"))
+print("Distance:",distance)
+message = {}
+message['Distance'] = distance
+message['Time'] = date_time
+data = json.dumps(message)
+publishToIoTTopic(pubTopic, data)
+GPIO.cleanup()
+print("Execution Completed")
